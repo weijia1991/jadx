@@ -1,0 +1,18 @@
+branch: release
+verifyConditions:
+  - '@semantic-release/github'
+prepare:
+  - path: '@semantic-release/exec'
+    cmd: "JADX_VERSION=${nextRelease.version} ./gradlew clean dist"
+publish:
+  - path: '@semantic-release/github'
+    assets:
+      - path: 'build/jadx.*\.zip'
+        label: 'zip bundle'
+      - path: 'build/jadx.*\.exe'
+        label: 'jadx-gui windows'
+success:
+  # upload to bintray releases
+  - path: '@semantic-release/exec'
+    cmd: "TARGET=skylot/jadx/releases/${nextRelease.version} CRED=\"--user=skylot --key=$BINTRAY_KEY\" jfrog bt vc $TARGET $CRED --desc=${nextRelease.version} && jfrog bt u 'build/jadx.*\\.(zip|exe)' $TARGET $CRED --regexp true"
+
